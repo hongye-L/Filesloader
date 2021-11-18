@@ -35,9 +35,8 @@ public class FileService {
      * @param file 文件
      * @return 文件名
      */
-    @Async("taskExecutor")
     //现代化改造：多线程
-    public CompletableFuture<String> storeFile(MultipartFile file) {
+    public String storeFile(MultipartFile file) {
         // Normalize file name
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
@@ -51,7 +50,7 @@ public class FileService {
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return CompletableFuture.completedFuture(fileName);
+            return fileName;
         } catch (IOException ex) {
             throw new FileException("Could not store file " + fileName + ". Please try again!", ex);
         }
