@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 @RestController
 public class FileController {
@@ -23,17 +25,16 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
-
     @PostMapping("/uploadFile")
     public Files uploadFile(@RequestParam("file") MultipartFile file){
-        String fileName = fileService.storeFile(file);
+        CompletableFuture<String> fileName = fileService.storeFile(file);
 
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/downloadFile/")
-                .path(fileName)
+                .path(String.valueOf(fileName))
                 .toUriString();
 
-        return new Files(fileName, fileDownloadUri,
+        return new Files(String.valueOf(fileName), fileDownloadUri,
                 file.getContentType(), file.getSize());
     }
 
@@ -51,7 +52,7 @@ public class FileController {
 
     @GetMapping("/downloadFile/{fileName:.*}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-        Resource resource = fileService.loadFileAsResource(fileName);
+        Resource resource = (Resource) fileService.loadFileAsResource(fileName);
         String contentType = null;
         try {
             request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());

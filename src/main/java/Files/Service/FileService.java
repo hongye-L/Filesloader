@@ -4,6 +4,7 @@ import Files.Errors.FileException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -14,11 +15,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
+import java.util.concurrent.CompletableFuture;
+
 @Service
 @Component
 public class FileService {
     private Path fileStorageLocation; // 文件在本地存储的地址
-
     public FileService(@Value("${file.upload.path}") String path) {
         this.fileStorageLocation = Paths.get(path).toAbsolutePath().normalize();
         try {
@@ -33,7 +35,9 @@ public class FileService {
      * @param file 文件
      * @return 文件名
      */
-    public String storeFile(MultipartFile file) {
+    @Async("taskExecutor")
+    //现代化改造：多线程
+    public CompletableFuture<String> storeFile(MultipartFile file) {
         // Normalize file name
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
@@ -47,12 +51,11 @@ public class FileService {
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return fileName;
+            return CompletableFuture.completedFuture(fileName);
         } catch (IOException ex) {
             throw new FileException("Could not store file " + fileName + ". Please try again!", ex);
         }
     }
-
     public Resource loadFileAsResource(String fileName) {
         try {
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
