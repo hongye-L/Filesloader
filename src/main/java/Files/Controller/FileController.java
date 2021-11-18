@@ -1,4 +1,5 @@
 package Files.Controller;
+
 import Files.Model.Files;
 import Files.Service.FileService;
 import org.slf4j.Logger;
@@ -8,17 +9,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 @RestController
 public class FileController {
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
@@ -52,7 +51,7 @@ public class FileController {
 
     @GetMapping("/downloadFile/{fileName:.*}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-        Resource resource = (Resource) fileService.loadFileAsResource(fileName);
+        Resource resource = fileService.loadFileAsResource(fileName);
         String contentType = null;
         try {
             request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
