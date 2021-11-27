@@ -9,7 +9,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,12 +17,23 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * The type File controller.
+ */
 @RestController
 public class FileController {
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
     @Autowired
     private FileService fileService;
+
+    /**
+     * Upload file files.
+     *
+     * @param file the file
+     * @return the files
+     */
     @PostMapping("/uploadFile")
     public Files uploadFile(@RequestParam("file") MultipartFile file){
         String fileName = fileService.storeFile(file);
@@ -37,6 +47,12 @@ public class FileController {
                 file.getContentType(), file.getSize());
     }
 
+    /**
+     * Upload multiple files list.
+     *
+     * @param files the files
+     * @return the list
+     */
     @PostMapping("/uploadMultipleFiles")
     public List<Files> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
         List<Files> list = new ArrayList<>();
@@ -49,6 +65,13 @@ public class FileController {
         return list;
     }
 
+    /**
+     * Download file response entity.
+     *
+     * @param fileName the file name
+     * @param request  the request
+     * @return the response entity
+     */
     @GetMapping("/downloadFile/{fileName:.*}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
         Resource resource = fileService.loadFileAsResource(fileName);

@@ -6,10 +6,19 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+
+/**
+ * The type Async configuration.
+ */
 @Configuration
 @EnableAsync
 public class AsyncConfiguration {
-    // 声明一个线程池(并指定线程池的名字)
+    /**
+     * Async executor executor.
+     *
+     * @return the executor
+     *  声明一个线程池
+     */
     @Bean("taskExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

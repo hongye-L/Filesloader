@@ -17,10 +17,19 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The type File service.
+ */
 @Service
 @Component
 public class FileService {
     private Path fileStorageLocation; // 文件在本地存储的地址
+
+    /**
+     * Instantiates a new File service.
+     *
+     * @param path the path
+     */
     public FileService(@Value("${file.upload.path}") String path) {
         this.fileStorageLocation = Paths.get(path).toAbsolutePath().normalize();
         try {
@@ -32,10 +41,11 @@ public class FileService {
 
     /**
      * 存储文件到系统
+     *
      * @param file 文件
-     * @return 文件名
+     * @return 文件名 string
      */
-    //现代化改造：多线程
+//现代化改造：多线程
     public String storeFile(MultipartFile file) {
         // Normalize file name
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -55,6 +65,13 @@ public class FileService {
             throw new FileException("Could not store file " + fileName + ". Please try again!", ex);
         }
     }
+
+    /**
+     * Load file as resource resource.
+     *
+     * @param fileName the file name
+     * @return the resource
+     */
     public Resource loadFileAsResource(String fileName) {
         try {
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
